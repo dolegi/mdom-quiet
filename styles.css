@@ -1,0 +1,21 @@
+/* mdom-quiet. Only Obsidian's own variables, so it fits any theme. */
+
+/* No tab bar over the note. The bar itself stays (on macOS it holds the
+   window's buttons and is where the window is dragged), empty and flat. */
+body.mdom-quiet-tabs .workspace-split.mod-root .workspace-tab-header-container-inner,
+body.mdom-quiet-tabs .workspace-split.mod-root .workspace-tab-header-new-tab,
+body.mdom-quiet-tabs .workspace-split.mod-root .workspace-tab-header-tab-list,
+body.mdom-quiet-tabs .workspace-split.mod-root .sidebar-toggle-button {
+  display: none;
+}
+body.mdom-quiet-tabs .workspace-split.mod-root .workspace-tab-header-container {
+  background: var(--background-primary);
+  border-bottom: 0;
+}
+
+/* The vault and folders before the note's name: drawn, not text, so a rename
+   never holds them. */
+body.mdom-quiet-path .inline-title[data-mdom-path]::before {
+  content: attr(data-mdom-path);
+  color: var(--text-muted);
+}
