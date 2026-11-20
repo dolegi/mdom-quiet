@@ -1,4 +1,7 @@
-/* mdom-quiet. Only Obsidian's own variables, so it fits any theme. */
+/* mdom-quiet. Only Obsidian's own variables and these prefixed classes, so
+   it fits any theme. Three parts: the page itself, the notes, the tags. */
+
+/* ---- the page ---- */
 
 /* No tab bar over the note. The bar itself stays (on macOS it holds the
    window's buttons and is where the window is dragged), empty and flat. */
@@ -19,3 +22,267 @@ body.mdom-quiet-path .inline-title[data-mdom-path]::before {
   content: attr(data-mdom-path);
   color: var(--text-muted);
 }
+
+/* ---- the notes ----
+   The notes as a page of their own. Only Obsidian's own
+   variables, so it fits any theme; the mdom theme gives it its look. */
+
+/* A page, not a box over the note: the window's background, all of it. */
+.modal-container.mdom-notes-container .modal-bg {
+  background: var(--background-primary);
+  opacity: 1 !important;
+}
+.mdom-notes {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: calc(var(--safe-area-inset-top, 0px) + 12px) max(20px, var(--safe-area-inset-left, 0px)) 0;
+  color: var(--text-normal);
+  background: var(--background-primary);
+  overflow: hidden;
+}
+/* On a Mac with Obsidian's own title bar, clear the window's buttons where
+   the column would reach them. */
+@media (max-width: 800px) {
+  body.mod-macos.is-hidden-frameless:not(.is-fullscreen):not(.is-mobile) .mdom-notes {
+    padding-top: calc(var(--header-height) + 4px);
+  }
+}
+.mdom-notes > * { width: 100%; max-width: var(--file-line-width); flex: none; }
+
+/* The search: bare text on a rule. On the keys, a title in its place. */
+.mdom-notes-head { display: flex; align-items: center; gap: 8px; }
+.mdom-notes .mdom-notes-title {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 0;
+  font: 16px/28px var(--font-text);
+  color: var(--text-normal);
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+.mdom-notes input.mdom-notes-query,
+.mdom-notes input.mdom-notes-query:hover,
+.mdom-notes input.mdom-notes-query:focus,
+.mdom-notes input.mdom-notes-query:focus-visible {
+  flex: 1;
+  min-width: 0;
+  height: auto;
+  padding: 6px 0;
+  font: 16px/28px var(--font-text);
+  color: var(--text-normal);
+  caret-color: var(--caret-color, var(--interactive-accent));
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--background-modifier-border);
+  border-radius: 0;
+  box-shadow: none;
+  outline: none;
+}
+.mdom-notes input.mdom-notes-query::placeholder { color: var(--text-muted); }
+
+/* A button is a word, underlined in the rule, with a finger's room. */
+.mdom-notes button.mdom-notes-word {
+  height: auto;
+  padding: 10px 0 10px 8px;
+  font: 14px/20px var(--font-interface);
+  color: var(--text-normal);
+  background: none;
+  border: 0;
+  box-shadow: none;
+  text-decoration: underline 1px var(--background-modifier-border);
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.mdom-notes button.mdom-notes-word:hover { color: var(--text-normal); background: none; text-decoration-color: var(--text-faint); }
+/* Done and Keys are words alone; only Create, on the line under, is underlined. */
+.mdom-notes .mdom-notes-head button.mdom-notes-word { text-decoration: none; }
+
+/* The line under the search: quiet, and the Create word. */
+.mdom-notes-info {
+  min-height: 20px;
+  margin: 4px 0 8px;
+  font: 13px/20px var(--font-interface);
+  color: var(--text-muted);
+}
+.mdom-notes-info button.mdom-notes-word { padding: 0; margin-inline-end: 12px; font-size: 13px; }
+
+/* The rows. The list is 8px wider than the column each side, so the band
+   can bleed past the text without the scroll clipping it. */
+.mdom-notes > .mdom-notes-rows {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-width: calc(var(--file-line-width) + 16px);
+  margin: 0;
+  padding: 0 8px 40vh;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.mdom-notes-rows:focus, .mdom-notes-rows:focus-visible { outline: none; box-shadow: none; }
+.mdom-notes-rows li {
+  margin: 0 -8px;
+  padding: 6px 8px;
+  font: 16px/28px var(--font-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mdom-notes-row { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.mdom-notes-row.is-selected { background: var(--background-modifier-active-hover); }
+
+/* Tree depth: two columns a level. */
+.mdom-notes-rows li.mdom-notes-d1 { padding-inline-start: calc(8px + 2ch); }
+.mdom-notes-rows li.mdom-notes-d2 { padding-inline-start: calc(8px + 4ch); }
+.mdom-notes-rows li.mdom-notes-d3 { padding-inline-start: calc(8px + 6ch); }
+.mdom-notes-rows li.mdom-notes-d4 { padding-inline-start: calc(8px + 8ch); }
+.mdom-notes-rows li.mdom-notes-d5 { padding-inline-start: calc(8px + 10ch); }
+.mdom-notes-rows li.mdom-notes-d6 { padding-inline-start: calc(8px + 12ch); }
+.mdom-notes-rows li.mdom-notes-d7 { padding-inline-start: calc(8px + 14ch); }
+.mdom-notes-rows li.mdom-notes-d8 { padding-inline-start: calc(8px + 16ch); }
+/* Every row keeps two columns for a folder's arrow, so a note lines up with
+   its folder's name. */
+.mdom-notes-arrow { display: inline-block; width: 2ch; color: var(--text-muted); }
+
+/* A note or a folder: the dot's room, the name, the date at the end. */
+.mdom-notes-note, .mdom-notes-folder, .mdom-notes-command { display: flex; align-items: baseline; }
+.mdom-notes-note::before, .mdom-notes-folder::before {
+  content: '';
+  flex: none;
+  width: 7px;
+  height: 7px;
+  margin-inline-end: 9px;
+  border-radius: 50%;
+  align-self: center;
+}
+.mdom-notes-note.is-here::before { background: var(--interactive-accent); }
+/* A note cut, waiting to be pasted. */
+.mdom-notes-rows li.is-cut { opacity: 0.45; }
+.mdom-notes-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.mdom-notes-dir { color: var(--text-muted); }
+.mdom-notes-when {
+  flex: none;
+  padding-inline-start: 12px;
+  font: 12px/20px var(--font-interface);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The lines found inside a note: a quiet heading, then each line, in from it. */
+.mdom-notes-rows li.mdom-notes-heading {
+  padding: 14px 8px 2px;
+  font: 12px/18px var(--font-interface);
+  color: var(--text-muted);
+}
+.mdom-notes-rows li.mdom-notes-hit { padding-inline-start: calc(8px + 16px); }
+.mdom-notes-snippet { color: var(--text-muted); }
+.mdom-notes-row.is-selected .mdom-notes-snippet { color: var(--text-normal); }
+
+/* What matched: a pale band; on the chosen row, an underline in the accent. */
+.mdom-notes-rows mark { color: inherit; background: var(--text-highlight-bg); }
+.mdom-notes-row.is-selected mark {
+  background: none;
+  text-decoration: underline 2px var(--interactive-accent);
+  text-underline-offset: 3px;
+}
+
+/* A row asking before its note goes to the trash: in the row, never a dialog. */
+.mdom-notes-rows li.is-asking { display: flex; align-items: center; padding-block: 0; }
+.mdom-notes-rows li.is-asking .mdom-notes-label { padding: 6px 0; color: var(--text-normal); }
+.mdom-notes-rows li.is-asking button {
+  flex: none;
+  align-self: stretch;
+  height: auto;
+  min-width: 64px;
+  padding: 0 8px;
+  font: 14px/20px var(--font-interface);
+  color: var(--text-normal);
+  background: none;
+  border: 0;
+  box-shadow: none;
+  cursor: pointer;
+}
+.mdom-notes-rows li.is-asking .mdom-notes-yes { font-weight: 600; }
+.mdom-notes-rows li.is-asking .mdom-notes-no { margin-inline-end: -8px; color: var(--text-muted); }
+
+/* Under a finger, each note has a ×, a finger wide. */
+.mdom-notes-rows li.mdom-notes-note:has(.mdom-notes-remove) { align-items: center; padding-block: 0; }
+.mdom-notes-rows li.mdom-notes-note:has(.mdom-notes-remove) .mdom-notes-label { padding: 6px 0; }
+.mdom-notes-rows button.mdom-notes-remove {
+  flex: none;
+  align-self: stretch;
+  height: auto;
+  min-width: 44px;
+  margin-inline-end: -8px;
+  padding: 0;
+  font: 20px/1 var(--font-interface);
+  color: var(--text-muted);
+  background: none;
+  border: 0;
+  box-shadow: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.mdom-notes-rows button.mdom-notes-remove:active { color: var(--interactive-accent); }
+
+/* A key on the keys page: what it does, and the key at the far end. */
+.mdom-notes-command { gap: 16px; }
+.mdom-notes-command .mdom-notes-keys { flex: none; font: 13px/28px var(--font-interface); color: var(--text-muted); }
+/* The keys are a page for a keyboard: no button for it under a finger. */
+.mdom-notes.is-touch .mdom-notes-keys-button { display: none; }
+
+/* ---- the tags ----
+   A tag is a pale chip, its text deep, in a hue of its own from
+   its name (tagHue), at one lightness and strength for all. Only
+   Obsidian's variables and these classes, so it fits any theme: the chip's
+   shape is the theme's, its colours these.
+
+   In the editor CodeMirror puts the hue's span inside each of Obsidian's
+   spans for a tag (its # and its name): the chip, Obsidian's span, is
+   reached through :has, and the text is the inner span's. */
+
+.mdom-tag-h0, .cm-hashtag:has(> .mdom-tag-h0) { --mdom-tag-h: 0; }
+.mdom-tag-h1, .cm-hashtag:has(> .mdom-tag-h1) { --mdom-tag-h: 22.5; }
+.mdom-tag-h2, .cm-hashtag:has(> .mdom-tag-h2) { --mdom-tag-h: 45; }
+.mdom-tag-h3, .cm-hashtag:has(> .mdom-tag-h3) { --mdom-tag-h: 67.5; }
+.mdom-tag-h4, .cm-hashtag:has(> .mdom-tag-h4) { --mdom-tag-h: 90; }
+.mdom-tag-h5, .cm-hashtag:has(> .mdom-tag-h5) { --mdom-tag-h: 112.5; }
+.mdom-tag-h6, .cm-hashtag:has(> .mdom-tag-h6) { --mdom-tag-h: 135; }
+.mdom-tag-h7, .cm-hashtag:has(> .mdom-tag-h7) { --mdom-tag-h: 157.5; }
+.mdom-tag-h8, .cm-hashtag:has(> .mdom-tag-h8) { --mdom-tag-h: 180; }
+.mdom-tag-h9, .cm-hashtag:has(> .mdom-tag-h9) { --mdom-tag-h: 202.5; }
+.mdom-tag-h10, .cm-hashtag:has(> .mdom-tag-h10) { --mdom-tag-h: 225; }
+.mdom-tag-h11, .cm-hashtag:has(> .mdom-tag-h11) { --mdom-tag-h: 247.5; }
+.mdom-tag-h12, .cm-hashtag:has(> .mdom-tag-h12) { --mdom-tag-h: 270; }
+.mdom-tag-h13, .cm-hashtag:has(> .mdom-tag-h13) { --mdom-tag-h: 292.5; }
+.mdom-tag-h14, .cm-hashtag:has(> .mdom-tag-h14) { --mdom-tag-h: 315; }
+.mdom-tag-h15, .cm-hashtag:has(> .mdom-tag-h15) { --mdom-tag-h: 337.5; }
+
+/* The editor's tag, a reading view's link, a property's pill. */
+.cm-hashtag:has(> .mdom-tag),
+a.tag[class*='mdom-tag-h'],
+.multi-select-pill[class*='mdom-tag-h'] {
+  --mdom-tag-color: oklch(50% 0.085 var(--mdom-tag-h));
+  --mdom-tag-bg: oklch(95% 0.022 var(--mdom-tag-h));
+  --mdom-tag-bg-hover: oklch(91% 0.035 var(--mdom-tag-h));
+  --tag-color: var(--mdom-tag-color);
+  --tag-color-hover: var(--mdom-tag-color);
+  --tag-background: var(--mdom-tag-bg);
+  --tag-background-hover: var(--mdom-tag-bg-hover);
+  --pill-color: var(--mdom-tag-color);
+  --pill-color-hover: var(--mdom-tag-color);
+  --pill-background: var(--mdom-tag-bg);
+  --pill-background-hover: var(--mdom-tag-bg-hover);
+  --pill-color-remove: var(--mdom-tag-color);
+}
+/* In the dark, the same hues: deep chips, light text. */
+.theme-dark .cm-hashtag:has(> .mdom-tag),
+.theme-dark a.tag[class*='mdom-tag-h'],
+.theme-dark .multi-select-pill[class*='mdom-tag-h'] {
+  --mdom-tag-color: oklch(80% 0.08 var(--mdom-tag-h));
+  --mdom-tag-bg: oklch(32% 0.04 var(--mdom-tag-h));
+  --mdom-tag-bg-hover: oklch(38% 0.05 var(--mdom-tag-h));
+}
+/* The text, the # too: the tag's colour, not a dimmed mark. */
+.mdom-tag { color: var(--tag-color); }

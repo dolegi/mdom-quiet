@@ -1,11 +1,13 @@
-// Pure logic for mdom-quiet: nothing here imports Obsidian, so Node tests it
-// directly (test/lib.test.js).
+// Pure logic for the page itself (settings, one page, the path): nothing here
+// imports Obsidian, so Node tests it directly (test/lib.test.js). The notes'
+// logic is in notes/lib.js, the tags' in marks/lib.js.
 
 /** @typedef {{
  *   onePage: boolean,
  *   closeSidebars: boolean,
  *   hideTabs: boolean,
  *   pathTitle: boolean,
+ *   colourTags: boolean,
  * }} Settings */
 
 /** @type {Settings} */
@@ -14,6 +16,7 @@ export const DEFAULTS = {
   closeSidebars: true, // sidebars start closed
   hideTabs: true,      // no tab bar over the note
   pathTitle: true,     // the vault and folders before the note's name
+  colourTags: true,    // each tag a chip in a hue from its name
 };
 
 /** Saved settings over the defaults, keeping only known keys of the right type.

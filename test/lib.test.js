@@ -9,6 +9,8 @@ test('readSettings keeps known booleans and drops the rest', () => {
   assert.equal(s.onePage, false);
   assert.equal(s.hideTabs, true);
   assert.equal('stray' in s, false);
+  assert.equal(s.colourTags, true);
+  assert.equal(readSettings({ colourTags: false }).colourTags, false);
 });
 
 test('pathPrefix is the vault and folders, each with a slash', () => {

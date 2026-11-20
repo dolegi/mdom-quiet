@@ -1,0 +1,9 @@
+[
+  {"query": "atlas", "items": ["journal/2026-09-13.md", "projects/atlas.md", "reading/list.md"], "want": ["projects/atlas.md"]},
+  {"query": "jr", "items": ["journal/a.md", "jr.md", "projects/jar.md"], "want": ["jr.md", "journal/a.md", "projects/jar.md"]},
+  {"query": "a", "items": ["b.md", "ab.md", "a.md", "ba.md"], "want": ["a.md", "ab.md", "ba.md"]},
+  {"query": "A", "items": ["a.md", "A.md"], "want": ["A.md"]},
+  {"query": "zz", "items": ["a.md"], "want": []},
+  {"query": "café", "items": ["Café.md", "cafe.md", "notes/café.md"], "want": ["Café.md", "notes/café.md"]},
+  {"query": "2026 09", "items": ["journal/2026-09-13.md", "2026 09.md"], "want": ["2026 09.md"]}
+]

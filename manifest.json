@@ -3,7 +3,7 @@
   "name": "mdom quiet",
   "version": "0.1.0",
   "minAppVersion": "1.5.0",
-  "description": "One page, full screen: one note fills the window, a new tab or split replaces it, and the tab bar and sidebars stay out of the way.",
+  "description": "A quiet Obsidian: one note full screen, the sidebars and tab bar out of the way; your notes on a page of their own, as a tree with one search, to add, rename, move and trash from; and tags in colour.",
   "author": "Dom Ginger",
   "authorUrl": "",
   "isDesktopOnly": false

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Obsidian plugin: one page, full screen.",
+  "description": "Obsidian plugin: one page, full screen; the notes as a tree with one search; tags in colour.",
   "scripts": {
     "dev": "node esbuild.config.mjs --watch",
     "build": "npm run check && node esbuild.config.mjs",
@@ -13,6 +13,7 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "@codemirror/language": "^6.13.1",
     "esbuild": "^0.28.2",
     "obsidian": "^1.14.4",
     "typescript": "^7.0.2"
