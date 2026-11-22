@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import * as lib from '../src/marks/lib.js';
+import * as lib from '../src/tags/hue.js';
 
 // Pinned: were a tag's hue to change, every tag in every vault would change colour.
 const HUES = { garden: 10, plan: 5, soil: 6, Garden: 10, '#garden': 10, '"garden"': 10, 'projects/atlas': 10, a: 4, über: 11, 日本: 13, 'x-y_z': 3 };
@@ -24,7 +24,6 @@ test('every hue is in range, and they spread', () => {
   assert.equal(seen.size, lib.TAG_HUES);
 });
 
-test('the class and a link’s tag', () => {
+test('the class', () => {
   assert.equal(lib.tagClass('#garden'), 'mdom-tag-h10');
-  assert.equal(lib.linkTag('#garden'), 'garden');
 });

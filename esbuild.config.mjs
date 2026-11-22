@@ -9,7 +9,7 @@ const ctx = await esbuild.context({
   entryPoints: ['src/main.js'],
   bundle: true,
   format: 'cjs',
-  target: 'es2022',
+  target: 'es2023',
   outfile: 'main.js',
   external: ['obsidian', 'electron', '@codemirror/*', '@lezer/*', ...builtinModules],
   sourcemap: watch ? 'inline' : false,

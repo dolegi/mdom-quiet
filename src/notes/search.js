@@ -1,10 +1,10 @@
-// Pure logic for mdom-notes: nothing here imports Obsidian, so Node tests it
-// directly (test/lib.test.js).
+// Finding notes: by name, then the lines inside them. Pure: nothing here
+// imports Obsidian, so Node tests it directly (test/search.test.js).
 
 /** Of the lines a note holds, the search shows this many. */
 export const HITS_A_NOTE = 3;
 /** The search stops after this many lines. */
-export const HIT_LIMIT = 500;
+const HIT_LIMIT = 500;
 /** A line's text past the match is cut to this; the row ellipsizes anyway. */
 const POST_MAX = 400;
 
@@ -88,7 +88,7 @@ export function rankNames(query, paths) {
   if (!words.length) return [];
   const found = [];
   for (const path of paths) {
-    const lowPath = path.toLowerCase().replace(/\.(md|txt)$/, ''); // the extension is not the name
+    const lowPath = path.toLowerCase().replace(/\.md$/, ''); // the extension is not the name
     const name = nameOf(lowPath);
     let score;
     if (words.every((w) => name.includes(w))) {
@@ -164,46 +164,8 @@ export function snippet(text, col, len) {
   };
 }
 
-/** @param {string | null} p */
-function cleanRel(p) {
-  if (!p || p.startsWith('/')) return null;
-  for (const seg of p.split('/')) if (!seg || seg.startsWith('.')) return null;
-  return p;
-}
-
-/** Where a name typed in the search makes a note: `.md` added unless it ends
- * in .md, folders kept, nothing hidden or outside the vault. Obsidian opens
- * only markdown as a note, so every new note is markdown.
- * @param {string} query @returns {string | null} */
-export function newNotePath(query) {
-  const name = query.trim().replace(/\/+$/, '');
-  return cleanRel(name && (/\.md$/i.test(name) ? name : `${name}.md`));
-}
-
-/** A note's path as shown: its folders, and its name without `.md`.
- * @param {string} path */
-export function titleParts(path) {
-  const bare = path.replace(/\.md$/, '');
-  const cut = bare.lastIndexOf('/');
-  return { dir: cut < 0 ? '' : `${bare.slice(0, cut)}/`, name: bare.slice(cut + 1) };
-}
-
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-/** A note's last edit, quietly and short: the time today, else the date with
- * its year, "12 Nov 26".
- * @param {number} ms @param {number} [now] */
-export function editedLabel(ms, now = Date.now()) {
-  const d = new Date(ms);
-  const n = new Date(now);
-  /** @param {number} x */
-  const pad = (x) => String(x).padStart(2, '0');
-  if (d.toDateString() === n.toDateString()) return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  return `${d.getDate()} ${MONTHS[d.getMonth()]} ${pad(d.getFullYear() % 100)}`;
-}
-
-/** Every line in the notes that holds `q`: the notes in path order, the first match on each line, up to `limit`; `more`
- * says there were others. Reads one note at a time and gives the page a
+/** Every line in the notes that holds `q`: the notes in path order, the
+ * first match on each line, up to `limit`; `more` says there were others. Reads one note at a time and gives the page a
  * turn every few milliseconds, so typing never waits on it; `cancelled`
  * stops it (the query changed).
  * @param {string[]} paths
@@ -237,119 +199,4 @@ export async function searchNotes(paths, read, q, opts = {}) {
     }
   }
   return cancelled() ? null : { hits, more: false };
-}
-
-/** Where a rename puts a note: `.md` stays unless typed, folders typed are
- * kept, nothing hidden or outside the vault.
- * @param {string} from @param {string} typed @returns {string | null} */
-export function renamePath(from, typed) {
-  const name = typed.trim().replace(/\/+$/, '');
-  if (!name) return null;
-  const ext = from.lastIndexOf('.') > from.lastIndexOf('/') ? from.slice(from.lastIndexOf('.')) : '';
-  return cleanRel(/\.md$/i.test(name) ? name : name + ext);
-}
-
-/** What the search line holds when a rename starts: the path less `.md`.
- * @param {string} path */
-export const renameQuery = (path) => path.replace(/\.md$/, '');
-
-/** Where moving `path` into `folder` puts it: the same name there. Null if
- * the folder can't be one (`..`, a hidden name) or the note is there already.
- * @param {string} path @param {string} folder @returns {string | null} */
-export function movePath(path, folder) {
-  const name = nameOf(path);
-  const dir = folder.trim().replace(/^\/+|\/+$/g, '');
-  if (dir && dir.split('/').some((p) => !p.trim() || p === '.' || p === '..' || p.startsWith('.'))) return null;
-  const to = dir ? `${dir}/${name}` : name;
-  return to === path ? null : to;
-}
-
-/** Where a copy of `path` lands in `folder`: under its own name, or where
- * that is `taken`, "name copy", "name copy 2", and so on.
- * @param {string} path @param {string} folder @param {Set<string>} taken */
-export function copyPath(path, folder, taken) {
-  const name = nameOf(path);
-  const dot = name.lastIndexOf('.') < 1 ? name.length : name.lastIndexOf('.');
-  const pre = folder ? `${folder}/` : '';
-  for (let n = 0; ; n++) {
-    const to = `${pre}${name.slice(0, dot)}${n ? ` copy${n > 1 ? ` ${n}` : ''}` : ''}${name.slice(dot)}`;
-    if (!taken.has(to)) return to;
-  }
-}
-
-/** The folder a path is in, '' at the top. @param {string} path */
-export const dirOf = (path) => (path.includes('/') ? path.slice(0, path.lastIndexOf('/')) : '');
-
-/** Every folder a path is in, the outermost first: 'a/b/c.md' → a, a/b.
- * @param {string} path */
-export function foldersOf(path) {
-  const out = [];
-  for (let cut = path.indexOf('/'); cut >= 0; cut = path.indexOf('/', cut + 1)) out.push(path.slice(0, cut));
-  return out;
-}
-
-/** @typedef {{name: string, path: string, depth: number, dir: boolean, end: number}} TreeNode */
-
-/** The vault as a tree: in each folder its notes, then its folders, each by
- * name (in byte order). Folders
- * start closed but those holding `current`. Each node knows where its subtree
- * ends, so a closed folder is passed in one step however much it holds.
- * @param {string[]} paths @param {string | null} current */
-export function buildTree(paths, current) {
-  /** @typedef {{notes: {name: string, path: string}[], dirs: Map<string, Folder>}} Folder */
-  /** @type {Folder} */
-  const root = { notes: [], dirs: new Map() };
-  for (const path of paths.slice().sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))) {
-    let folder = root;
-    let from = 0;
-    for (let cut = path.indexOf('/'); cut >= 0; cut = path.indexOf('/', from)) {
-      const name = path.slice(from, cut);
-      let next = folder.dirs.get(name);
-      if (!next) folder.dirs.set(name, (next = { notes: [], dirs: new Map() }));
-      folder = next;
-      from = cut + 1;
-    }
-    folder.notes.push({ name: path.slice(from), path });
-  }
-  /** @type {TreeNode[]} */
-  const nodes = [];
-  /** @param {Folder} folder @param {string} at @param {number} depth */
-  const flatten = (folder, at, depth) => {
-    for (const n of folder.notes) nodes.push({ name: n.name, path: n.path, depth, dir: false, end: nodes.length + 1 });
-    for (const name of [...folder.dirs.keys()].sort()) {
-      const path = at ? `${at}/${name}` : name;
-      const node = { name, path, depth, dir: true, end: 0 };
-      nodes.push(node);
-      flatten(/** @type {Folder} */ (folder.dirs.get(name)), path, depth + 1);
-      node.end = nodes.length;
-    }
-  };
-  flatten(root, '', 0);
-  const expanded = new Set(current ? foldersOf(current) : []);
-  return {
-    nodes,
-    expanded,
-    /** The rows to draw: every node not inside a closed folder. */
-    visible() {
-      const out = [];
-      for (let i = 0; i < nodes.length; ) {
-        const n = nodes[i];
-        out.push(n);
-        i = n.dir && !expanded.has(n.path) ? n.end : i + 1;
-      }
-      return out;
-    },
-    /** @param {string} path */
-    toggle(path) {
-      if (!expanded.delete(path)) expanded.add(path);
-    },
-  };
-}
-
-/** Where a path is after a rename of `from` to `to` (a note or a folder):
- * itself, unless it is or is inside `from`.
- * @param {string} path @param {string} from @param {string} to */
-export function renamedPath(path, from, to) {
-  if (path === from) return to;
-  return path.startsWith(`${from}/`) ? to + path.slice(from.length) : path;
 }

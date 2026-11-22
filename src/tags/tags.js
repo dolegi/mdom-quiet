@@ -7,7 +7,7 @@
 import { syntaxTree } from '@codemirror/language';
 import { RangeSetBuilder } from '@codemirror/state';
 import { Decoration, ViewPlugin } from '@codemirror/view';
-import { linkTag, tagClass } from './lib.js';
+import { tagClass } from './hue.js';
 
 /** @typedef {import('@codemirror/view').EditorView} EditorView */
 /** @typedef {import('@codemirror/view').ViewUpdate} ViewUpdate */
@@ -43,8 +43,8 @@ function tagMarks(view) {
   return marks.finish();
 }
 
-/** The editor's part: a CodeMirror extension. */
-export const editorTags = ViewPlugin.fromClass(
+/** The editor's tags. */
+const editorTags = ViewPlugin.fromClass(
   class {
     /** @param {EditorView} view */
     constructor(view) {
@@ -64,6 +64,11 @@ export const editorTags = ViewPlugin.fromClass(
   { decorations: (v) => v.decorations },
 );
 
+/** @param {Element} el */
+function unpaint(el) {
+  for (const c of [...el.classList]) if (c.startsWith('mdom-tag-h')) el.classList.remove(c);
+}
+
 /** @param {Element} el @param {string} tag */
 function paint(el, tag) {
   const want = tagClass(tag);
@@ -72,16 +77,8 @@ function paint(el, tag) {
   el.classList.add(want);
 }
 
-/** @param {Element} el */
-function unpaint(el) {
-  for (const c of [...el.classList]) if (c.startsWith('mdom-tag-h')) el.classList.remove(c);
-}
-
-/** A reading view's tags, under `el` (a markdown post-processor).
- * @param {HTMLElement} el */
-export function paintLinks(el) {
-  el.querySelectorAll('a.tag').forEach((a) => paint(a, linkTag(a.textContent ?? '')));
-}
+/** A reading view's tags, under `el`. @param {HTMLElement} el */
+const paintLinks = (el) => el.querySelectorAll('a.tag').forEach((a) => paint(a, a.textContent ?? ''));
 
 /** The pills of a tags property, under `root`. @param {ParentNode} root */
 const pillsIn = (root) =>
@@ -90,9 +87,9 @@ const pillsIn = (root) =>
 /** @param {Element} pill */
 const paintPill = (pill) => paint(pill, pill.querySelector('.multi-select-pill-content')?.textContent ?? '');
 
-/** The properties' tags, now and as Obsidian draws and redraws them, and the
- * reading view's already drawn. Gives back what undoes it all. */
-export function paintPage() {
+/** Every pill of the properties' tags as Obsidian draws and redraws them,
+ * and the reading view's tags already drawn. Gives back what undoes it. */
+function paintPage() {
   const seen = new MutationObserver((records) => {
     for (const r of records) {
       for (const node of r.addedNodes) {
@@ -112,4 +109,32 @@ export function paintPage() {
     seen.disconnect();
     document.querySelectorAll('[class*="mdom-tag-h"]').forEach(unpaint);
   };
+}
+
+/** Tags in colour, while `on()` says so. Gives back what applies a change
+ * of the setting.
+ * @param {import('obsidian').Plugin} plugin @param {() => boolean} on */
+export function tags(plugin, on) {
+  /** The editor's extensions: empty while tags are not coloured.
+   * @type {import('@codemirror/state').Extension[]} */
+  const extensions = [];
+  plugin.registerEditorExtension(extensions);
+  plugin.registerMarkdownPostProcessor((el) => {
+    if (on()) paintLinks(el);
+  });
+  /** @type {(() => void) | null} */
+  let undo = null;
+  const apply = () => {
+    extensions.length = 0;
+    if (on()) extensions.push(editorTags);
+    plugin.app.workspace.updateOptions();
+    if (on() && !undo) undo = paintPage();
+    if (!on() && undo) {
+      undo();
+      undo = null;
+    }
+  };
+  plugin.app.workspace.onLayoutReady(apply);
+  plugin.register(() => undo?.());
+  return apply;
 }

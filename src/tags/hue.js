@@ -1,5 +1,5 @@
-// Pure logic for mdom-marks: nothing here imports Obsidian, so Node tests it
-// directly (test/lib.test.js).
+// A tag's hue. Pure: nothing here imports Obsidian, so Node tests it
+// directly (test/hue.test.js).
 
 /** The hues a tag can have; styles.css has a class for each. */
 export const TAG_HUES = 16;
@@ -17,7 +17,3 @@ export function tagHue(tag) {
 
 /** The class that paints a tag in its hue. @param {string} tag */
 export const tagClass = (tag) => `mdom-tag-h${tagHue(tag)}`;
-
-/** A reading view's tag link (`#garden`, href `#garden`) as its tag.
- * @param {string} text */
-export const linkTag = (text) => text.replace(/^#/, '');

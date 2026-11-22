@@ -54,6 +54,8 @@ body.mdom-quiet-path .inline-title[data-mdom-path]::before {
 .mdom-notes > * { width: 100%; max-width: var(--file-line-width); flex: none; }
 
 /* The search: bare text on a rule. On the keys, a title in its place. */
+.mdom-notes:not(.is-keys) .mdom-notes-title,
+.mdom-notes.is-keys :is(.mdom-notes-query, .mdom-notes-keys-button) { display: none; }
 .mdom-notes-head { display: flex; align-items: center; gap: 8px; }
 .mdom-notes .mdom-notes-title {
   flex: 1;

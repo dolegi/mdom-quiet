@@ -101,20 +101,25 @@ npm test        # node --test: the pure logic, with no Obsidian
 npm run build   # type-check (JSDoc, tsc --checkJs), then bundle
 ```
 
+Three parts that share only the settings, each wiring itself in:
+
 | | |
 |---|---|
-| `src/main.js` | The plugin: settings, one page, the path; wires in the rest. |
-| `src/lib.js` | Settings, the path, which pages to close. |
-| `src/notes/page.js` | The notes page. |
-| `src/notes/lib.js` | Its search, ranking, tree and paths. |
-| `src/marks/tags.js` | Tags in colour: the editor, reading view, properties. |
-| `src/marks/lib.js` | A tag's hue. |
+| `src/main.js` | The plugin: the settings tab, and each part switched on. |
+| `src/settings.js` | The settings: one table of name, description, default. |
+| `src/layout.js` | One page, sidebars, tab bar, the path. |
+| `src/notes/page.js` | The notes page: its modes, keys and actions. |
+| `src/notes/rows.js` | Its list: rows, selection, stepping. |
+| `src/notes/search.js` | Finding notes: by name, then the lines inside. |
+| `src/notes/tree.js` | The tree, and where a note goes in it. |
+| `src/tags/tags.js` | Tags in colour: the editor, reading view, properties. |
+| `src/tags/hue.js` | A tag's hue. |
 
-The `lib.js` files import nothing from Obsidian, so Node tests them directly
-(`test/`). esbuild is only a dev tool: it bundles `src/` into the one
-`main.js` Obsidian loads, leaving `obsidian` and CodeMirror to Obsidian. The
-plugin has no runtime dependencies. In a real Obsidian it is tested by
-`../e2e` (`make e2e`).
+`settings.js`, `search.js`, `tree.js` and `hue.js` import nothing from
+Obsidian, so Node tests them directly (`test/`); the rest is tested in a
+real Obsidian by `../e2e` (`make e2e`). esbuild is only a dev tool: it
+bundles `src/` into the one `main.js` Obsidian loads, leaving `obsidian`
+and CodeMirror to Obsidian. The plugin has no runtime dependencies.
 
 ## Release
 
